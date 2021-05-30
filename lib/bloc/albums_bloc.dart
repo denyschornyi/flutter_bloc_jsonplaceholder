@@ -1,5 +1,5 @@
-//event , state => new state => update ui
-
+import 'dart:io';
+import 'package:flutter_albums/api/exceptions.dart';
 import 'package:flutter_albums/api/services.dart';
 import 'package:flutter_albums/bloc/albums_events.dart';
 import 'package:flutter_albums/bloc/albums_states.dart';
@@ -17,8 +17,20 @@ class AlbumsBloc extends Bloc<AlbumsEvents, AlbumState> {
     switch (event) {
       case AlbumsEvents.fetchAlbums:
         yield AlbumLoading();
-        albums = await albumsRepo.getAlbumsList();
-        yield AlbumLoaded(albums: albums);
+        try {
+          albums = await albumsRepo.getAlbumsList();
+          yield AlbumLoaded(albums: albums);
+        } on SocketException {
+          yield AlbumListError(error: NoInternetException('No internet'));
+        } on HttpException {
+          yield AlbumListError(
+              error: NoServiceFoundException('No service found'));
+        } on FormatException {
+          yield AlbumListError(
+              error: InvalidFormatException('Invalid response format'));
+        } catch (e) {
+          yield AlbumListError(error: UnknownException('Unknown error' ));
+        }
         break;
     }
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_albums/api/services.dart';
 import 'package:flutter_albums/bloc/albums_bloc.dart';
 import 'package:flutter_albums/bloc/albums_events.dart';
 import 'package:flutter_albums/bloc/albums_states.dart';
@@ -38,17 +37,27 @@ class _AlbumScreenState extends State<AlbumScreen> {
       children: <Widget>[
         BlocBuilder<AlbumsBloc, AlbumState>(
             builder: (BuildContext context, AlbumState state) {
-              if (state is AlbumListError) {
-                return Text('Error');
-              }
-              if (state is AlbumLoaded) {
-                List<Album> albums = state.albums;
-                return _list(albums);
-              }
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            })
+          if (state is AlbumListError) {
+            final error = state.error;
+            return Expanded(
+              child: Center(
+                child: Container(
+                  child: Text(
+                    error.message,
+                    style: TextStyle(color: Colors.red, fontSize: 20,),
+                  ),
+                ),
+              ),
+            );
+          }
+          if (state is AlbumLoaded) {
+            List<Album> albums = state.albums;
+            return _list(albums);
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        })
       ],
     );
   }
